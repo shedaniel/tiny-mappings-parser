@@ -29,7 +29,7 @@ class TinyMappings implements Mappings {
 		ClassEntryImpl(Map<String, Integer> namespacesToIds, MappedStringDeduplicator deduplicator, String[] data, String[] namespaceList) {
 			this.namespacesToIds = namespacesToIds;
 			names = new String[namespaceList.length];
-			for (int i = 0; i < namespaceList.length; i++) {
+			for (int i = 0, end = Math.min(namespaceList.length, data.length - 1); i < end; i++) {
 				names[i] = deduplicator.deduplicate(MappedStringDeduplicator.Category.CLASS_NAME, data[i + 1]);
 			}
 		}
