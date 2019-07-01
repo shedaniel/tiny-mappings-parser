@@ -30,8 +30,11 @@ class TinyMappings implements Mappings {
 			this.namespacesToIds = namespacesToIds;
 			names = new String[namespaceList.length];
 			for (int i = 0, end = Math.min(namespaceList.length, data.length - 1); i < end; i++) {
+				if (data[i + 1].isEmpty()) continue; //Skip holes
 				names[i] = deduplicator.deduplicate(MappedStringDeduplicator.Category.CLASS_NAME, data[i + 1]);
 			}
+
+			assert Arrays.stream(names).filter(Objects::nonNull).noneMatch(String::isEmpty);
 		}
 
 		@Override
@@ -59,6 +62,7 @@ class TinyMappings implements Mappings {
 			);
 			// add namespaceList[1+]
 			for (int i = 1, end = Math.min(namespaceList.length, data.length - 3); i < end; i++) {
+				if (data[3 + i].isEmpty()) continue; //Skip holes
 				String target = namespaceList[i];
 				String mappedOwner = targetRemappers.get(target).map(data[1]);
 				String mappedDesc = isMethod ? targetRemappers.get(target).mapMethodDesc(data[2]) : targetRemappers.get(target).mapDesc(data[2]);
@@ -68,6 +72,8 @@ class TinyMappings implements Mappings {
 						deduplicator.deduplicate(descCategory, mappedDesc)
 				);
 			}
+
+			assert Arrays.stream(names).filter(Objects::nonNull).map(EntryTriple::getName).noneMatch(String::isEmpty);
 		}
 
 		@Override
