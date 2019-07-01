@@ -58,7 +58,7 @@ class TinyMappings implements Mappings {
 					deduplicator.deduplicate(descCategory, data[2])
 			);
 			// add namespaceList[1+]
-			for (int i = 1; i < namespaceList.length; i++) {
+			for (int i = 1, end = Math.min(namespaceList.length, data.length - 3); i < end; i++) {
 				String target = namespaceList[i];
 				String mappedOwner = targetRemappers.get(target).map(data[1]);
 				String mappedDesc = isMethod ? targetRemappers.get(target).mapMethodDesc(data[2]) : targetRemappers.get(target).mapDesc(data[2]);
