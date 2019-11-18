@@ -190,20 +190,17 @@ class TinyMappings implements Mappings {
 	}
 
 	@Override
-	public Collection<ClassEntry> getClassEntries() {
-		//noinspection unchecked
-		return (Collection<ClassEntry>) (Collection<?>) classEntries;
+	public Collection<? extends ClassEntry> getClassEntries() {
+		return classEntries;
 	}
 
 	@Override
-	public Collection<FieldEntry> getFieldEntries() {
-		//noinspection unchecked
-		return (Collection<FieldEntry>) (Collection<?>) fieldEntries;
+	public Collection<? extends FieldEntry> getFieldEntries() {
+		return fieldEntries;
 	}
 
 	@Override
-	public Collection<MethodEntry> getMethodEntries() {
-		//noinspection unchecked
-		return (Collection<MethodEntry>) (Collection<?>) methodEntries;
+	public Collection<? extends MethodEntry> getMethodEntries() {
+		return methodEntries;
 	}
 }
