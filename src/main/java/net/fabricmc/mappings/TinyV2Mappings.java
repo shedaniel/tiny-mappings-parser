@@ -501,6 +501,16 @@ final class TinyV2Mappings {
 	}
 
 	static Mappings read(String firstLine, BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
+		Visitor visitor = new Visitor(deduplicator, false, false, false);
+		visit(firstLine, reader, visitor);
+		return visitor.getMappings();
+	}
+
+	public static ExtendedMappings fullyRead(BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
+		return fullyRead(reader.readLine(), reader, deduplicator);
+	}
+
+	static ExtendedMappings fullyRead(String firstLine, BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
 		Visitor visitor = new Visitor(deduplicator);
 		visit(firstLine, reader, visitor);
 		return visitor.getMappings();

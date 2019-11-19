@@ -16,25 +16,61 @@
 
 package net.fabricmc.mappings;
 
+import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public final class MappingsProvider {
-    private MappingsProvider() {
+	private MappingsProvider() {
+	}
 
-    }
+	public static Mappings createEmptyMappings() {
+		return DummyMappings.INSTANCE;
+	}
 
-    public static Mappings createEmptyMappings() {
-        return DummyMappings.INSTANCE;
-    }
+	public static Mappings readTinyMappings(InputStream stream) throws IOException {
+		return readTinyMappings(stream, true);
+	}
 
-    public static Mappings readTinyMappings(InputStream stream) throws IOException {
-        return readTinyMappings(stream, true);
-    }
+	public static Mappings readTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+			String headerLine = reader.readLine();
 
-    public static Mappings readTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
-        return new TinyMappings(stream,
-                saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
-        );
-    }
+			if (headerLine == null) {
+				throw new EOFException();
+			} else if (headerLine.startsWith("v1\t")) {
+				return new TinyMappings(headerLine, reader,
+						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
+				);
+			} else if (headerLine.startsWith("tiny\t2\t")) {
+				return TinyV2Mappings.read(headerLine, reader,
+						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
+				);
+			} else {
+				throw new IOException("Invalid mapping version!");
+			}
+		}
+	}
+
+	public static ExtendedMappings readFullTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+			String headerLine = reader.readLine();
+
+			if (headerLine == null) {
+				throw new EOFException();
+			} else if (headerLine.startsWith("v1\t")) {
+				return ExtendedMappings.wrap(new TinyMappings(headerLine, reader,
+						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
+				));
+			} else if (headerLine.startsWith("tiny\t2\t")) {
+				return TinyV2Mappings.fullyRead(headerLine, reader,
+						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
+				);
+			} else {
+				throw new IOException("Invalid mapping version!");
+			}
+		}
+	}
 }
