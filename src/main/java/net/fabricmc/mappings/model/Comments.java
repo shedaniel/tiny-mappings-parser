@@ -17,11 +17,22 @@
 package net.fabricmc.mappings.model;
 
 import java.util.Collection;
+import java.util.Collections;
+
+import net.fabricmc.mappings.model.CommentEntry.Class;
+import net.fabricmc.mappings.model.CommentEntry.Field;
+import net.fabricmc.mappings.model.CommentEntry.Method;
+import net.fabricmc.mappings.model.CommentEntry.Parameter;
+import net.fabricmc.mappings.model.CommentEntry.LocalVariableComment;
 
 public interface Comments {
-    Collection<CommentEntry.Class> getClassComments();
-	Collection<CommentEntry.Field> getFieldComments();
-	Collection<CommentEntry.Method> getMethodComments();
-	Collection<CommentEntry.Parameter> getMethodParameterComments();
-	Collection<CommentEntry.LocalVariableComment> getLocalVariableComments();
+	Collection<Class> getClassComments();
+	Collection<Field> getFieldComments();
+	Collection<Method> getMethodComments();
+	Collection<Parameter> getMethodParameterComments();
+	Collection<LocalVariableComment> getLocalVariableComments();
+
+	static Comments empty() {
+		return new CommentsImpl(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+	}
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,75 +21,78 @@ import net.fabricmc.mappings.EntryTriple;
 import java.util.List;
 
 public abstract class CommentEntry {
-    private List<String> comments;
+	public static class Class extends CommentEntry {
+		private final String className;
 
-    public static class Class extends CommentEntry{
-        public Class(List<String> comments, String className) {
-            super(comments);
-            this.className = className;
-        }
+		public Class(List<String> comments, String className) {
+			super(comments);
+			this.className = className;
+		}
 
-        public String getClassName() {
-            return className;
-        }
+		public String getClassName() {
+			return className;
+		}		
+	}
 
-        private String className;
-    }
-    public static class Method extends CommentEntry{
-        public Method(List<String> comments, EntryTriple method) {
-            super(comments);
-            this.method = method;
-        }
+	public static class Method extends CommentEntry {
+		private final EntryTriple method;
 
-        public EntryTriple getMethod() {
-            return method;
-        }
+		public Method(List<String> comments, EntryTriple method) {
+			super(comments);
+			this.method = method;
+		}
 
-        private EntryTriple method;
-    }
-    public static class Field extends CommentEntry{
-        public Field(List<String> comments, EntryTriple field) {
-            super(comments);
-            this.field = field;
-        }
+		public EntryTriple getMethod() {
+			return method;
+		}
+	}
 
-        private EntryTriple field;
+	public static class Field extends CommentEntry {
+		private final EntryTriple field;
 
-        public EntryTriple getField() {
-            return field;
-        }
-    }
+		public Field(List<String> comments, EntryTriple field) {
+			super(comments);
+			this.field = field;
+		}
 
-    public static class Parameter extends CommentEntry{
-        public Parameter(List<String> comments, MethodParameter parameter) {
-            super(comments);
-            this.parameter = parameter;
-        }
+		public EntryTriple getField() {
+			return field;
+		}
+	}
 
-        public MethodParameter getParameter() {
-            return parameter;
-        }
+	public static class Parameter extends CommentEntry {
+		private final MethodParameter parameter;
 
-        private MethodParameter parameter;
-    }
-    public static class LocalVariableComment extends CommentEntry{
-        public LocalVariableComment(List<String> comments, LocalVariable localVariable) {
-            super(comments);
-            this.localVariable = localVariable;
-        }
+		public Parameter(List<String> comments, MethodParameter parameter) {
+			super(comments);
+			this.parameter = parameter;
+		}
 
-        public LocalVariable getLocalVariable() {
-            return localVariable;
-        }
+		public MethodParameter getParameter() {
+			return parameter;
+		}
+	}
 
-        private LocalVariable localVariable;
-    }
+	public static class LocalVariableComment extends CommentEntry {
+		private final LocalVariable localVariable;
 
-    private CommentEntry(List<String> comments) {
-        this.comments = comments;
-    }
+		public LocalVariableComment(List<String> comments, LocalVariable localVariable) {
+			super(comments);
+			this.localVariable = localVariable;
+		}
 
-    public List<String> getComments() {
-        return comments;
-    }
+		public LocalVariable getLocalVariable() {
+			return localVariable;
+		}
+	}
+
+	private final List<String> comments;
+
+	private CommentEntry(List<String> comments) {
+		this.comments = comments;
+	}
+
+	public List<String> getComments() {
+		return comments;
+	}
 }
