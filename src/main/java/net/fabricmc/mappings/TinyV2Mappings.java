@@ -276,7 +276,7 @@ final class TinyV2Mappings {
 			currentMemberName = new EntryTriple(currentClassName, name, descriptor);
 		}
 
-		private static class MappingsImpl implements Mappings {
+		private static class MappingsImpl implements ExtendedMappings {
 			private final Collection<ClassEntry> classEntries;
 			private final Collection<MethodEntry> methodEntries;
 			private final Collection<FieldEntry> fieldEntries;
@@ -310,12 +310,12 @@ final class TinyV2Mappings {
 				return fieldEntries;
 			}
 
-			//@Override
+			@Override
 			public Collection<MethodParameterEntry> getMethodParameterEntries() {
 				return methodParameterEntries;
 			}
 
-			//@Override
+			@Override
 			public Collection<LocalVariableEntry> getLocalVariableEntries() {
 				return localVariableEntries;
 			}
@@ -325,13 +325,13 @@ final class TinyV2Mappings {
 				return namespaces;
 			}
 
-			//@Override
+			@Override
 			public Comments getComments() {
 				return comments;
 			}
 		}
 
-		public Mappings getMappings() {
+		public ExtendedMappings getMappings() {
 			@SuppressWarnings("unchecked") //We'll be careful Java
 			UnaryOperator<String>[] remappers = new UnaryOperator[namespaces.size()];
 			remappers[0] = UnaryOperator.identity();
