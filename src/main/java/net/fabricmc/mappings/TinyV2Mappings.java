@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -137,8 +138,9 @@ final class TinyV2Mappings {
 			}
 		}
 
-		private final Collection<ClassBits> classes = new ArrayList<>();
 		private final MappedStringDeduplicator depuplicator;
+		private final boolean keepParams, keepLocals, keepComments;
+		private final Collection<ClassBits> classes = new ArrayList<>();
 		private List<String> namespaces;
 
 		private ClassBits currentClass;
@@ -152,7 +154,14 @@ final class TinyV2Mappings {
 		private TinyState currentCommentType;
 
 		public Visitor(MappedStringDeduplicator deduplicator) {
+			this(deduplicator, true, true, true);
+		}
+
+		public Visitor(MappedStringDeduplicator deduplicator, boolean keepParams, boolean keepLocals, boolean keepComments) {
 			this.depuplicator = deduplicator;
+			this.keepParams = keepParams;
+			this.keepLocals = keepLocals;
+			this.keepComments = keepComments;
 		}
 
 		@Override
@@ -198,10 +207,12 @@ final class TinyV2Mappings {
 		public void pushParameter(String[] parts, int localVariableIndex) {
 			assert parts.length > 0;
 
-			assert parts[0] != null && !parts[0].isEmpty();
-			currentParameterName = new MethodParameter(currentMemberName, parts[0], localVariableIndex);
+			if (keepParams) {
+				assert parts[0] != null && !parts[0].isEmpty();
+				currentParameterName = new MethodParameter(currentMemberName, parts[0], localVariableIndex);
 
-			currentClass.addParameter(currentParameterName.getMethod(), localVariableIndex, parts);
+				currentClass.addParameter(currentParameterName.getMethod(), localVariableIndex, parts);
+			}
 			setNewCommentType(TinyState.PARAMETER);
 		}
 
@@ -209,15 +220,19 @@ final class TinyV2Mappings {
 		public void pushLocalVariable(String[] parts, int localVariableIndex, int localVariableStartOffset, int localVariableTableIndex) {
 			assert parts.length > 0;
 
-			assert parts[0] != null && !parts[0].isEmpty();
-			currentLocalVariableName = new LocalVariable(currentMemberName, parts[0], localVariableIndex, localVariableStartOffset, localVariableTableIndex);
+			if (keepLocals) {
+				assert parts[0] != null && !parts[0].isEmpty();
+				currentLocalVariableName = new LocalVariable(currentMemberName, parts[0], localVariableIndex, localVariableStartOffset, localVariableTableIndex);
 
-			currentClass.addLocal(currentLocalVariableName.getMethod(), localVariableIndex, localVariableStartOffset, localVariableTableIndex, parts);
+				currentClass.addLocal(currentLocalVariableName.getMethod(), localVariableIndex, localVariableStartOffset, localVariableTableIndex, parts);
+			}
 			setNewCommentType(TinyState.LOCAL_VARIABLE);
 		}
 
 		@Override
 		public void pushComment(String comment) {
+			if (!keepComments) return;
+
 			if (currentComments == null) {
 				switch (currentCommentType) {
 				case CLASS:
@@ -230,9 +245,11 @@ final class TinyV2Mappings {
 					comments.getMethodComments().add(new CommentEntry.Method(currentComments = new ArrayList<>(), currentMemberName));
 					break;
 				case PARAMETER:
+					if (!keepParams) return;
 					comments.getMethodParameterComments().add(new CommentEntry.Parameter(currentComments = new ArrayList<>(), currentParameterName));
 					break;
 				case LOCAL_VARIABLE:
+					if (!keepLocals) return;
 					comments.getLocalVariableComments().add(new CommentEntry.LocalVariableComment(currentComments = new ArrayList<>(), currentLocalVariableName));
 					break;
 				default:
@@ -348,8 +365,8 @@ final class TinyV2Mappings {
 			Collection<ClassEntry> classEntries = new ArrayList<>(classes.size());
 			Collection<MethodEntry> methodEntries = new ArrayList<>();
 			Collection<FieldEntry> fieldEntries = new ArrayList<>();
-			Collection<MethodParameterEntry> methodParameterEntries = new ArrayList<>();
-			Collection<LocalVariableEntry> localVariableEntries = new ArrayList<>();
+			Collection<MethodParameterEntry> methodParameterEntries = keepParams ? new ArrayList<>() : Collections.emptyList();
+			Collection<LocalVariableEntry> localVariableEntries = keepLocals ? new ArrayList<>() : Collections.emptyList();
 
 			ToIntFunction<String> namespaceIndex = namespaces::indexOf;
 			String rootNamespace = namespaces.get(0);
@@ -367,32 +384,38 @@ final class TinyV2Mappings {
 				}
 				methodEntries.addAll(methods);
 
-				for (MethodEntry methodEntry : methods) {
-					EntryTriple method = methodEntry.get(rootNamespace);
-					String methodName = method.getName() + method.getDesc();
+				if (keepParams || keepLocals) {
+					for (MethodEntry methodEntry : methods) {
+						EntryTriple method = methodEntry.get(rootNamespace);
+						String methodName = method.getName() + method.getDesc();
 
-					EntryTriple[] triples = null; //Lazily fill when needed
+						EntryTriple[] triples = null; //Lazily fill when needed
 
-					Collection<BiFunction<EntryTriple[], ToIntFunction<String>, MethodParameterEntry>> paramFactories = clazz.parameters.get(methodName);
-					if (paramFactories != null) {
-						triples = new EntryTriple[namespaces.size()];
+						if (keepParams) {
+							Collection<BiFunction<EntryTriple[], ToIntFunction<String>, MethodParameterEntry>> paramFactories = clazz.parameters.get(methodName);
+							if (paramFactories != null) {
+								triples = new EntryTriple[namespaces.size()];
 
-						triples[0] = method;
-						for (int i = 1; i < namespaces.size(); i++) {
-							triples[i] = methodEntry.get(namespaces.get(i));
+								triples[0] = method;
+								for (int i = 1; i < namespaces.size(); i++) {
+									triples[i] = methodEntry.get(namespaces.get(i));
+								}
+
+								for (BiFunction<EntryTriple[], ToIntFunction<String>, MethodParameterEntry> factory : paramFactories) {
+									methodParameterEntries.add(factory.apply(triples, namespaceIndex));
+								}
+							}
 						}
 
-						for (BiFunction<EntryTriple[], ToIntFunction<String>, MethodParameterEntry> factory : paramFactories) {
-							methodParameterEntries.add(factory.apply(triples, namespaceIndex));
-						}
-					}
+						if (keepLocals) {
+							Collection<BiFunction<EntryTriple[], ToIntFunction<String>, LocalVariableEntry>> localFactories = clazz.locals.get(methodName);
+							if (localFactories != null) {
+								if (triples == null) triples = namespaces.stream().map(methodEntry::get).toArray(EntryTriple[]::new);
 
-					Collection<BiFunction<EntryTriple[], ToIntFunction<String>, LocalVariableEntry>> localFactories = clazz.locals.get(methodName);
-					if (localFactories != null) {
-						if (triples == null) triples = namespaces.stream().map(methodEntry::get).toArray(EntryTriple[]::new);
-
-						for (BiFunction<EntryTriple[], ToIntFunction<String>, LocalVariableEntry> factory : localFactories) {
-							localVariableEntries.add(factory.apply(triples, namespaceIndex));
+								for (BiFunction<EntryTriple[], ToIntFunction<String>, LocalVariableEntry> factory : localFactories) {
+									localVariableEntries.add(factory.apply(triples, namespaceIndex));
+								}
+							}
 						}
 					}
 				}
@@ -400,8 +423,8 @@ final class TinyV2Mappings {
 
 			((ArrayList<?>) methodEntries).trimToSize();
 			((ArrayList<?>) fieldEntries).trimToSize();
-			((ArrayList<?>) methodParameterEntries).trimToSize();
-			((ArrayList<?>) localVariableEntries).trimToSize();
+			if (keepParams) ((ArrayList<?>) methodParameterEntries).trimToSize();
+			if (keepLocals) ((ArrayList<?>) localVariableEntries).trimToSize();
 			return new MappingsImpl(classEntries, methodEntries, fieldEntries, methodParameterEntries, localVariableEntries, namespaces, comments);
 		}
 	}
