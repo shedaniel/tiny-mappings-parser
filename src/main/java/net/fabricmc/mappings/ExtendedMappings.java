@@ -11,6 +11,10 @@ public interface ExtendedMappings extends Mappings {
 	Collection<? extends LocalVariableEntry> getLocalVariableEntries();
 	Comments getComments();
 
+	default boolean isExtended() {
+		return !getMethodParameterEntries().isEmpty() || !getLocalVariableEntries().isEmpty() || !getComments().isEmpty();
+	}
+
 	static ExtendedMappings createEmpty() {
 		return wrap(DummyMappings.INSTANCE);
 	}

@@ -32,6 +32,10 @@ public interface Comments {
 	Collection<Parameter> getMethodParameterComments();
 	Collection<LocalVariableComment> getLocalVariableComments();
 
+	default boolean isEmpty() {
+		return getClassComments().isEmpty() && getFieldComments().isEmpty() && getMethodComments().isEmpty() && getMethodParameterComments().isEmpty() && getLocalVariableComments().isEmpty();
+	}
+
 	static Comments empty() {
 		return new CommentsImpl(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 	}

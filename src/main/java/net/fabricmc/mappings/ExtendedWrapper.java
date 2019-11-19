@@ -35,6 +35,11 @@ final class ExtendedWrapper implements ExtendedMappings {
 	}
 
 	@Override
+	public boolean isExtended() {
+		return false;
+	}
+
+	@Override
 	public Collection<? extends MethodParameterEntry> getMethodParameterEntries() {
 		return Collections.emptyList();
 	}
