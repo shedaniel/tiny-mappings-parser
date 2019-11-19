@@ -16,9 +16,9 @@
 
 package net.fabricmc.mappings;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 
 interface MappedStringDeduplicator {
     enum Category {
