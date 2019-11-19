@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,11 @@ import net.fabricmc.mappings.model.LocalVariable;
 import net.fabricmc.mappings.model.LocalVariableEntry;
 import net.fabricmc.mappings.model.MethodParameter;
 import net.fabricmc.mappings.model.MethodParameterEntry;
+import net.fabricmc.mappings.model.CommentEntry.Class;
+import net.fabricmc.mappings.model.CommentEntry.Field;
+import net.fabricmc.mappings.model.CommentEntry.LocalVariableComment;
+import net.fabricmc.mappings.model.CommentEntry.Method;
+import net.fabricmc.mappings.model.CommentEntry.Parameter;
 
 /**
  * A factory for the Tiny V2 mapping parser.
@@ -425,7 +431,49 @@ final class TinyV2Mappings {
 			((ArrayList<?>) fieldEntries).trimToSize();
 			if (keepParams) ((ArrayList<?>) methodParameterEntries).trimToSize();
 			if (keepLocals) ((ArrayList<?>) localVariableEntries).trimToSize();
-			return new MappingsImpl(classEntries, methodEntries, fieldEntries, methodParameterEntries, localVariableEntries, namespaces, comments);
+			return new MappingsImpl(classEntries, methodEntries, fieldEntries, methodParameterEntries, localVariableEntries, namespaces, keepComments ? trim(comments) : Comments.empty());
+		}
+
+		private static Comments trim(Comments comments) {
+			List<Class> classComments = trim(comments.getClassComments());
+			List<Field> fieldComments = trim(comments.getFieldComments());
+			List<Method> methodComments = trim(comments.getMethodComments());
+			List<Parameter> methodParameterComments = trim(comments.getMethodParameterComments());
+			List<LocalVariableComment> localVariableComments = trim(comments.getLocalVariableComments());
+
+			return classComments.isEmpty() && fieldComments.isEmpty() && methodComments.isEmpty() && methodParameterComments.isEmpty() && localVariableComments.isEmpty() ? 
+					Comments.empty() : new CommentsImpl(classComments, fieldComments, methodComments, methodParameterComments, localVariableComments);
+		}
+
+		private static <T extends CommentEntry> List<T> trim(Collection<T> comments) {
+			List<T> shorterComments = new ArrayList<>(comments);
+
+			for (Iterator<T> it = shorterComments.iterator(); it.hasNext();) {
+				T comment = it.next();
+
+				if (comment.getComments().stream().allMatch(line -> {
+					int strLen;
+			        if (line == null || (strLen = line.length()) == 0) {
+			            return true;
+			        }
+
+			        for (int i = 0; i < strLen; i++) {
+			            if (!Character.isWhitespace(line.charAt(i))) {
+			                return false;
+			            }
+			        }
+			        return true;
+				})) {
+					it.remove();
+				}
+			}
+
+			if (shorterComments.isEmpty()) {
+				return Collections.emptyList();
+			} else {
+				((ArrayList<?>) shorterComments).trimToSize();
+				return shorterComments;
+			}
 		}
 	}
 
