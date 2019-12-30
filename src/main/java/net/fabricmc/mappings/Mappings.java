@@ -28,11 +28,11 @@ import java.util.Collection;
 public interface Mappings {
 	Collection<String> getNamespaces();
 
-	Collection<ClassEntry> getClassEntries();
-	Collection<FieldEntry> getFieldEntries();
-	Collection<MethodEntry> getMethodEntries();
-	default Collection<MethodParameterEntry> getMethodParameterEntries() { return new ArrayList<>(); }
-	default Collection<LocalVariableEntry> getLocalVariableEntries() { return new ArrayList<>(); }
+	Collection<? extends ClassEntry> getClassEntries();
+	Collection<? extends FieldEntry> getFieldEntries();
+	Collection<? extends MethodEntry> getMethodEntries();
+	default Collection<? extends MethodParameterEntry> getMethodParameterEntries() { return new ArrayList<>(); }
+	default Collection<? extends LocalVariableEntry> getLocalVariableEntries() { return new ArrayList<>(); }
 	default Comments getComments(){
 		return new CommentsImpl(new ArrayList<>(),new ArrayList<>(),new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
 	}
