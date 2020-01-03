@@ -98,7 +98,7 @@ final class TinyV2Mappings {
 			}
 
 			public void addParameter(EntryTriple method, int localVariableIndex, String... names) {
-				assert names[0].equals(method.getOwner());
+				assert this.names[0].equals(method.getOwner());
 				addParameter(method.getName() + method.getDesc(), localVariableIndex, names);
 			}
 
@@ -121,7 +121,7 @@ final class TinyV2Mappings {
 			}
 
 			public void addLocal(EntryTriple method, int localVariableIndex, int indexStartOffset, int lvtIndex, String... names) {
-				assert names[0].equals(method.getOwner());
+				assert this.names[0].equals(method.getOwner());
 				addLocal(method.getName() + method.getDesc(), localVariableIndex, indexStartOffset, lvtIndex, names);
 			}
 
@@ -214,7 +214,7 @@ final class TinyV2Mappings {
 			assert parts.length > 0;
 
 			if (keepParams) {
-				assert parts[0] != null && !parts[0].isEmpty();
+				assert Arrays.stream(parts).filter(Objects::nonNull).noneMatch(String::isEmpty);
 				currentParameterName = new MethodParameter(currentMemberName, parts[0], localVariableIndex);
 
 				currentClass.addParameter(currentParameterName.getMethod(), localVariableIndex, parts);
@@ -227,7 +227,7 @@ final class TinyV2Mappings {
 			assert parts.length > 0;
 
 			if (keepLocals) {
-				assert parts[0] != null && !parts[0].isEmpty();
+				assert Arrays.stream(parts).filter(Objects::nonNull).noneMatch(String::isEmpty);
 				currentLocalVariableName = new LocalVariable(currentMemberName, parts[0], localVariableIndex, localVariableStartOffset, localVariableTableIndex);
 
 				currentClass.addLocal(currentLocalVariableName.getMethod(), localVariableIndex, localVariableStartOffset, localVariableTableIndex, parts);
@@ -342,7 +342,7 @@ final class TinyV2Mappings {
 				for (int i = 0; i < classPools.length; i++) classPools[i] = new HashMap<>();
 
 				for (ClassBits clazz : classes) {
-					assert clazz.names.length == classPools.length - 1;
+					assert clazz.names.length == remappers.length;
 
 					for (int i = 1; i < clazz.names.length; i++) {
 						classPools[i - 1].put(clazz.names[0], clazz.names[i]);
