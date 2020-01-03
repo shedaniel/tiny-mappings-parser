@@ -1,4 +1,4 @@
-package net.fabricmc.mappings;
+package net.fabricmc.mappings.visitor;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
