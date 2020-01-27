@@ -42,10 +42,10 @@ import net.fabricmc.mappings.OldV2Reader;
 
 class ImplementationDifferenceTest {
 	private Path getTiny() throws IOException {
-		File tempJar = File.createTempFile("1.15.1-test-mappings", ".jar");
-		Path temp = File.createTempFile("1.15.1-test-mappings", ".tiny").toPath();
+		File tempJar = File.createTempFile("1.15.2-test-mappings", ".jar");
+		Path temp = File.createTempFile("1.15.2-test-mappings", ".tiny").toPath();
 
-		FileUtils.copyURLToFile(new URL("https://maven.fabricmc.net/net/fabricmc/yarn/" + UrlEscapers.urlPathSegmentEscaper().escape("1.15.1+build.23/yarn-1.15.1+build.23-v2.jar")), tempJar);
+		FileUtils.copyURLToFile(new URL("https://maven.fabricmc.net/net/fabricmc/yarn/" + UrlEscapers.urlPathSegmentEscaper().escape("1.15.2+build.7/yarn-1.15.2+build.7-v2.jar")), tempJar);
 		try (FileSystem fileSystem = FileSystems.newFileSystem(tempJar.toPath(), null)) {
 			Files.copy(fileSystem.getPath("mappings/mappings.tiny"), temp, StandardCopyOption.REPLACE_EXISTING);
 		}
