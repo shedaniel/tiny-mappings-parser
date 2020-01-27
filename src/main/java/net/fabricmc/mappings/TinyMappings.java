@@ -109,7 +109,7 @@ class TinyMappings implements Mappings {
 	private final List<ClassEntryImpl> classEntries;
 	private final List<EntryImpl> fieldEntries, methodEntries;
 
-	TinyMappings(String firstLine, BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
+	TinyMappings(String firstLine, OffsetReader reader, MappedStringDeduplicator deduplicator) throws IOException {
 		if (firstLine == null) throw new IllegalArgumentException("Empty reader!");
 
 		String[] header = firstLine.split("\t");

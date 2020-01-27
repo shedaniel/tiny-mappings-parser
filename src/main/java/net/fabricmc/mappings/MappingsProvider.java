@@ -16,7 +16,6 @@
 
 package net.fabricmc.mappings;
 
-import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,7 @@ public final class MappingsProvider {
 	}
 
 	public static Mappings readTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+		try (OffsetReader reader = new OffsetReader(new InputStreamReader(stream))) {
 			String headerLine = reader.readLine();
 
 			if (headerLine == null) {
@@ -45,7 +44,7 @@ public final class MappingsProvider {
 						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
 				);
 			} else if (headerLine.startsWith("tiny\t2\t")) {
-				return TinyV2Mappings.read(headerLine, reader,
+				return TinyV2VisitorBridge.read(headerLine, reader,
 						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
 				);
 			} else {
@@ -55,7 +54,7 @@ public final class MappingsProvider {
 	}
 
 	public static ExtendedMappings readFullTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+		try (OffsetReader reader = new OffsetReader(new InputStreamReader(stream))) {
 			String headerLine = reader.readLine();
 
 			if (headerLine == null) {
@@ -65,7 +64,7 @@ public final class MappingsProvider {
 						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
 				));
 			} else if (headerLine.startsWith("tiny\t2\t")) {
-				return TinyV2Mappings.fullyRead(headerLine, reader,
+				return TinyV2VisitorBridge.fullyRead(headerLine, reader,
 						saveMemoryUsage ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY
 				);
 			} else {

@@ -35,6 +35,12 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.fabricmc.mappings.ClassEntry;
+import net.fabricmc.mappings.EntryTriple;
+import net.fabricmc.mappings.ExtendedMappings;
+import net.fabricmc.mappings.FieldEntry;
+import net.fabricmc.mappings.MappedStringDeduplicator;
+import net.fabricmc.mappings.MethodEntry;
 import net.fabricmc.mappings.MappedStringDeduplicator.Category;
 import net.fabricmc.mappings.model.CommentEntry;
 import net.fabricmc.mappings.model.Comments;
@@ -52,7 +58,7 @@ import net.fabricmc.mappings.model.CommentEntry.Parameter;
 /**
  * A factory for the Tiny V2 mapping parser.
  */
-final class TinyV2Mappings {
+public final class OldV2Reader {
 	private static class Visitor implements TinyVisitor {
 		private class ClassBits {
 			final String[] names;
@@ -482,35 +488,11 @@ final class TinyV2Mappings {
 	private static final String SPACER_STRING = "\t";
 	private static final String ESCAPED_NAMES_PROPERTY = "escaped-names";
 
-	/**
-	 * Explores a Tiny V2 mapping with a visitor.
-	 *
-	 * <p>This method will not close the {@code reader}!
-	 *
-	 * @param reader  the reader that provides the mapping content
-	 * @param visitor the visitor
-	 *
-	 * @throws IOException if an error occurs which reading or parsing the mapping file
-	 */
-	public static void visit(BufferedReader reader, TinyVisitor visitor) throws IOException {
-		visit(reader.readLine(), reader, visitor);
+	public static ExtendedMappings fullyRead(BufferedReader reader, boolean deduplicate) throws IOException {
+		return fullyRead(reader.readLine(), reader, deduplicate ? new MappedStringDeduplicator.MapBased() : MappedStringDeduplicator.EMPTY);
 	}
 
-	public static Mappings read(BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
-		return read(reader.readLine(), reader, deduplicator);
-	}
-
-	static Mappings read(String firstLine, BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
-		Visitor visitor = new Visitor(deduplicator, false, false, false);
-		visit(firstLine, reader, visitor);
-		return visitor.getMappings();
-	}
-
-	public static ExtendedMappings fullyRead(BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
-		return fullyRead(reader.readLine(), reader, deduplicator);
-	}
-
-	static ExtendedMappings fullyRead(String firstLine, BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
+	private static ExtendedMappings fullyRead(String firstLine, BufferedReader reader, MappedStringDeduplicator deduplicator) throws IOException {
 		Visitor visitor = new Visitor(deduplicator);
 		visit(firstLine, reader, visitor);
 		return visitor.getMappings();
@@ -586,7 +568,7 @@ final class TinyV2Mappings {
 		visitor.finish();
 	}
 
-	public static Map<String, String> readMetadata(BufferedReader reader) throws IOException, IllegalArgumentException {
+	private static Map<String, String> readMetadata(BufferedReader reader) throws IOException, IllegalArgumentException {
 		Map<String, String> properties = new LinkedHashMap<>();
 
 		String line;
@@ -624,7 +606,7 @@ final class TinyV2Mappings {
 		return ret;
 	}
 
-	private TinyV2Mappings() {
+	private OldV2Reader() {
 	}
 
 	private enum TinyState {

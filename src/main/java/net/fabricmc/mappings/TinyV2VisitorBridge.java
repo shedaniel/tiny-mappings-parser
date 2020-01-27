@@ -8,7 +8,6 @@
 package net.fabricmc.mappings;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,7 +24,6 @@ import java.util.function.UnaryOperator;
 
 import org.objectweb.asm.commons.Remapper;
 
-import net.fabricmc.mappings.MappedStringDeduplicator.MapBased;
 import net.fabricmc.mappings.MappedStringDeduplicator.Category;
 import net.fabricmc.mappings.model.CommentEntry;
 import net.fabricmc.mappings.model.CommentEntry.Class;
@@ -45,32 +43,19 @@ import net.fabricmc.mappings.visitor.LocalVisitor;
 import net.fabricmc.mappings.visitor.MappingsVisitor;
 import net.fabricmc.mappings.visitor.MethodVisitor;
 import net.fabricmc.mappings.visitor.ParameterVisitor;
-import net.fabricmc.mappings.visitor.TinyV2Visitor;
 
-public class TinyV2VisitorBridge implements MappingsVisitor {
-	public static Mappings read(Reader reader, boolean saveMemoryUsage) throws IOException {
-		return read(reader, saveMemoryUsage ? new MapBased() : MappedStringDeduplicator.EMPTY);
+class TinyV2VisitorBridge implements MappingsVisitor {
+	static Mappings read(String firstLine, OffsetReader reader, MappedStringDeduplicator deduplicator) throws IOException {
+		return read(firstLine, reader, deduplicator, false, false, false);
 	}
 
-	static Mappings read(Reader reader, MappedStringDeduplicator deduplicator) throws IOException {
-		return read(reader, deduplicator, false, false, false);
+	static ExtendedMappings fullyRead(String firstLine, OffsetReader reader, MappedStringDeduplicator deduplicator) throws IOException {
+		return read(firstLine, reader, deduplicator, true, true, true);
 	}
 
-	public static ExtendedMappings fullyRead(Reader reader, boolean saveMemoryUsage) throws IOException {
-		return fullyRead(reader, saveMemoryUsage ? new MapBased() : MappedStringDeduplicator.EMPTY);
-	}
-
-	static ExtendedMappings fullyRead(Reader reader, MappedStringDeduplicator deduplicator) throws IOException {
-		return read(reader, deduplicator, true, true, true);
-	}
-
-	public static ExtendedMappings read(Reader reader, boolean saveMemoryUsage, boolean keepParams, boolean keepLocals, boolean keepComments) throws IOException {
-		return read(reader, saveMemoryUsage ? new MapBased() : MappedStringDeduplicator.EMPTY, keepParams, keepLocals, keepComments);
-	}
-
-	static ExtendedMappings read(Reader reader, MappedStringDeduplicator deduplicator, boolean keepParams, boolean keepLocals, boolean keepComments) throws IOException {
+	private static ExtendedMappings read(String firstLine, OffsetReader reader, MappedStringDeduplicator deduplicator, boolean keepParams, boolean keepLocals, boolean keepComments) throws IOException {
 		TinyV2VisitorBridge visitor = new TinyV2VisitorBridge(deduplicator, keepParams, keepLocals, keepComments);
-		TinyV2Visitor.read(reader, visitor);
+		TinyV2Visitor.read(firstLine, reader, visitor);
 		return visitor.getMappings();
 	}
 

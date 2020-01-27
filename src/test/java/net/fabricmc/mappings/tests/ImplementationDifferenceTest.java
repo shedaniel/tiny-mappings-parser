@@ -9,13 +9,11 @@ package net.fabricmc.mappings.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -40,7 +38,7 @@ import net.fabricmc.mappings.ExtendedMappings;
 import net.fabricmc.mappings.FieldEntry;
 import net.fabricmc.mappings.MappingsProvider;
 import net.fabricmc.mappings.MethodEntry;
-import net.fabricmc.mappings.TinyV2VisitorBridge;
+import net.fabricmc.mappings.OldV2Reader;
 
 class ImplementationDifferenceTest {
 	private Path getTiny() throws IOException {
@@ -65,16 +63,16 @@ class ImplementationDifferenceTest {
 		time = System.nanoTime();
 
 		ExtendedMappings original;
-		try (InputStream in = Files.newInputStream(mappings)) {
-			original = MappingsProvider.readFullTinyMappings(in, false);
+		try (BufferedReader in = Files.newBufferedReader(mappings)) {
+			original = OldV2Reader.fullyRead(in, false);
 		}
 
 		System.out.printf("Original took %.5f milliseconds%n", (System.nanoTime() - time) / 1_000_000D);
 		time = System.nanoTime();
 
 		ExtendedMappings visitor;
-		try (Reader in =  new InputStreamReader(Files.newInputStream(mappings), StandardCharsets.UTF_8)) {
-			visitor = TinyV2VisitorBridge.fullyRead(in, false);
+		try (InputStream in = Files.newInputStream(mappings)) {
+			visitor = MappingsProvider.readFullTinyMappings(in, false);
 		}
 
 		System.out.printf("Visitor took %.5f milliseconds%n", (System.nanoTime() - time) / 1_000_000D);
