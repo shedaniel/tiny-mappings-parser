@@ -18,7 +18,7 @@ import net.fabricmc.mappings.visitor.MappingsVisitor;
 import net.fabricmc.mappings.visitor.MethodVisitor;
 import net.fabricmc.mappings.visitor.ParameterVisitor;
 
-public class TinyV2Visitor {
+public final class TinyV2Visitor {
 	private static final String HEADER_MARKER = "tiny";
 	private static final char INDENT = '\t';
 
@@ -30,6 +30,9 @@ public class TinyV2Visitor {
 
 	static void read(String firstLine, OffsetReader reader, MappingsVisitor visitor) throws IOException {
 		visit(firstLine, reader, visitor);
+	}
+
+	private TinyV2Visitor() {
 	}
 
 	private static abstract class LineReader<T extends LineReader<?>> {

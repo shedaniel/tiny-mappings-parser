@@ -77,11 +77,11 @@ class TinyV2VisitorBridge implements MappingsVisitor {
 		private List<String> currentComments;
 		private TinyState currentCommentType;
 
-		private String[] deduplicate(Category categpry, String[] strings) {
+		private String[] deduplicate(Category category, String[] strings) {
 			String[] out = new String[strings.length];
 
 			for (int i = 0; i < out.length; i++) {
-				out[i] = depuplicator.deduplicate(categpry, strings[i]);
+				out[i] = depuplicator.deduplicate(category, strings[i]);
 			}
 
 			return out;
@@ -260,13 +260,13 @@ class TinyV2VisitorBridge implements MappingsVisitor {
 		}
 	}
 
-	private final MappedStringDeduplicator depuplicator;
-	private final boolean keepParams, keepLocals, keepComments;
+	final MappedStringDeduplicator depuplicator;
+	final boolean keepParams, keepLocals, keepComments;
 	private final Collection<ClassBits> classes = new ArrayList<>();
 	final Comments comments = new CommentsImpl();
 	private String[] namespaces;
 
-	TinyV2VisitorBridge(MappedStringDeduplicator deduplicator, boolean keepParams, boolean keepLocals, boolean keepComments) {
+	private TinyV2VisitorBridge(MappedStringDeduplicator deduplicator, boolean keepParams, boolean keepLocals, boolean keepComments) {
 		this.depuplicator = deduplicator;
 		this.keepParams = keepParams;
 		this.keepLocals = keepLocals;

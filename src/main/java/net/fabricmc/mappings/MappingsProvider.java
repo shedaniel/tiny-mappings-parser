@@ -20,6 +20,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public final class MappingsProvider {
 	private MappingsProvider() {
@@ -34,7 +35,7 @@ public final class MappingsProvider {
 	}
 
 	public static Mappings readTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
-		try (OffsetReader reader = new OffsetReader(new InputStreamReader(stream))) {
+		try (OffsetReader reader = new OffsetReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
 			String headerLine = reader.readLine();
 
 			if (headerLine == null) {
@@ -54,7 +55,7 @@ public final class MappingsProvider {
 	}
 
 	public static ExtendedMappings readFullTinyMappings(InputStream stream, boolean saveMemoryUsage) throws IOException {
-		try (OffsetReader reader = new OffsetReader(new InputStreamReader(stream))) {
+		try (OffsetReader reader = new OffsetReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
 			String headerLine = reader.readLine();
 
 			if (headerLine == null) {
