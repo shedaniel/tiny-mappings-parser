@@ -388,7 +388,7 @@ public final class TinyV2Visitor {
 
 		LineReader<?> lineReader; {
 			String[] parts = splitIndents(firstLine, 0, 5);
-			if (parts.length < 5 || !HEADER_MARKER.equals(parts[0])) {
+			if (parts.length < 4 || !HEADER_MARKER.equals(parts[0])) {
 				throw new IllegalArgumentException("Unsupported format!");
 			}
 
