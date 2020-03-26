@@ -129,7 +129,10 @@ public final class TinyV2Visitor {
 				if (line.charAt(0) == 'c' && line.charAt(1) == '\t') {
 					inClass = true;
 
-					String[] names = splitIndents(line, 2, namespaces);					
+					String[] names = splitIndents(line, 2, namespaces);	
+					if (names.length != namespaces) {
+						throw new IllegalArgumentException("Invalid class declaration: \"" + line + '"');
+					}
 					currentClass = visitor.visitClass(offset, escapedNames ? unescapeNames(names, 0) : names);
 
 					return this;
